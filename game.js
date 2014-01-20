@@ -6,7 +6,7 @@ var operators = ['+','-','/','*'];
 var numbers = [0,1,2,3,4,5,6,7,8,9];
 
 // Generate random operator
-Array.prototype.getRandomPosition = function(){
+Array.prototype.getRandomElement = function(){
     return this[Math.floor(Math.random()*this.length)];
 }
 
@@ -16,7 +16,7 @@ Array.prototype.shuffle = function(){
 };
 
 Array.prototype.getRandomList = function(){
-    var n = R(1,this.length);
+	var n = R(1,this.length);
 	var randomList = [];
 	
 	this.shuffle();
@@ -34,36 +34,89 @@ var R = function(min,max){
 }
 
 // Do Calculation
-function doOperation(value1, value2, operation) {
+function doOperation(value1, operation, value2) {
 	return eval(value1+operation+value2);
 }
 
-function randomLevelGeneration(operations, numbers, numOfCycles) {
-
-    printline("randomLevelGeneration");
-    var number = numbers.getRandomPosition;
-    var operation = operations.getRandomPosition;
-    printline(number);
-    printline(operation);
-	var total = 0;
-	for (var i = numOfCycles; i >= 0; i--) {
-		total = doOperation (total, numbers.getRandomPosition, operations.getRandomPosition);
+function isMultiple(x,y){
+	//x and y are both integers
+	var remainder = x % y;
+	if (remainder == 0){
+		return true;
+	} else {
+		return false;
 	}
-    printline(total);
+}
+
+function randomLevelGeneration(listOfNumbers, listOfOperators, numOfCycles) {
+	var total = listOfNumbers.getRandomElement();
+	var level = ""+total;
+	for (var i = 0; i < numOfCycles;) {
+		var operator = listOfOperators.getRandomElement();
+		var number = listOfNumbers.getRandomElement();
+		if(operator == '/' && number == 0){
+			continue;
+		}
+		if(operator == '/' && !isMultiple(eval(level),number)){
+			continue;
+		}
+		level += operator + number;
+		i++;
+		//total = doOperation(total, listOfOperators.getRandomElement(), listOfNumbers.getRandomElement());
+	}
+	return level;
 }
 
 // generate the needed seeds
 function generateSeeds() {
-    var MIN_CYCLES = 5;
-    var MAX_CYCLES = 20;
-    printline("generateSeeds");
-	var listOfOperators = operators.getRandomList();//randomNumberOfOperators();
-	printline(listOfOperators);
-	var listOfNumbers = numbers.getRandomList();//randomNumberOfNumbers();
-	printline(listOfNumbers);
-    var cycles = R(MIN_CYCLES, MAX_CYCLES);
-    printline(cycles);
-    randomLevelGeneration(listOfOperators, listOfNumbers, cycles);
+	localStorage.clear();
+    //printline("generateSeeds");
+	var listOfOperators = operators.getRandomList();
+	//printline(listOfOperators);
+	var listOfNumbers = numbers.getRandomList();
+	//enable(listOfOperators);
+	//enable(listOfNumbers);
+	var level = randomLevelGeneration(listOfNumbers,listOfOperators,R(3,5));
+	console.log(level);
+	console.log(eval(level));
+	//printline(listOfNumbers);
+	//save();
+	//load();
+}
+
+// Storage Utils
+function save(){
+	if (localStorage.level)
+	  {
+	  localStorage.level=Number(localStorage.level)+1;
+	  }
+	else
+	  {
+	  localStorage.level=1;
+	  }
+}
+
+function load(){
+	if (localStorage.level)
+	  {
+	  console.log(localStorage.level);
+	  }
+	else
+	  {
+	  console.log(0);
+	  }
+}
+
+function saveObject(name,obj){
+	var testObject = { 'one': 1, 'two': 2, 'three': 3 };
+
+	// Put the object into storage
+	localStorage.setItem('testObject', JSON.stringify(testObject));
+
+	// Retrieve the object from storage
+	var retrievedObject = localStorage.getItem('testObject');
+
+	console.log('retrievedObject: ', JSON.parse(retrievedObject));
 }
 
 generateSeeds();
